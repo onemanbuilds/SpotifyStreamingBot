@@ -1,5 +1,5 @@
 # SpotifyStreamingBot
- Simple tool which plays music between the given amount of time with multiple accounts.
+ Simple tool which plays spotify songs between the given amount of time with multiple accounts.
  
 # Tool
 ![](https://i.ibb.co/PGnp4Z3/tool.png)
