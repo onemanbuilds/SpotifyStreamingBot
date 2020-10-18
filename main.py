@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.options import Options
 from time import sleep
 from random import randint
 from concurrent.futures import ThreadPoolExecutor
+from colorama import init,Fore
 import os
 
 class Main:
@@ -21,15 +22,25 @@ class Main:
     def __init__(self):
         self.clear()
         self.SetTitle('One Man Builds Spotify Streaming Tool Selenium')
-        self.browser_amount = int(input('[QUESTION] How many browser would you like to run at the same time: '))
+        init(convert=True)
+        title = Fore.YELLOW+"""
+                            
+                    ____ ___  ____ ___ _ ____ _   _    ____ ___ ____ ____ ____ _  _ _ _  _ ____ 
+                    [__  |__] |  |  |  | |___  \_/     [__   |  |__/ |___ |__| |\/| | |\ | | __ 
+                    ___] |    |__|  |  | |      |      ___]  |  |  \ |___ |  | |  | | | \| |__] 
+                                                                                                
+        
+        """
+        print(title)
+        self.browser_amount = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many browser would you like to run at the same time: '))
         self.number_of_songs = 0
         self.url = ""
         self.minplay = 0
         self.maxplay = 0
-        self.minplay = int(input('[QUESTION] Enter the minimum amount of time (seconds) to stream: '))
-        self.maxplay = int(input('[QUESTION] Enter the maximum amount of time (seconds) to stream: '))
-        self.number_of_songs = int(input('[QUESTION] How many songs want to stream on the playlist: '))
-        self.url = str(input('[QUESTION] Enter the stream url: '))
+        self.minplay = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the minimum amount of time (seconds) to stream: '))
+        self.maxplay = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the maximum amount of time (seconds) to stream: '))
+        self.number_of_songs = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many songs want to stream on the playlist: '))
+        self.url = str(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the stream url: '))
         print('')
 
     def ReadFile(self,filename,method):
@@ -48,8 +59,10 @@ class Main:
         login_button_elem.click()
         sleep(1)
         if driver.current_url == 'https://accounts.spotify.com/en/status':
+            print(Fore.GREEN+'['+Fore.WHITE+'!'+Fore.GREEN+'] LOGGED IN WITH | {0}:{1}'.format(username,password))
             logged_in = True
         else:
+            print(Fore.RED+'['+Fore.WHITE+'-'+Fore.RED+'] FAILED TO LOGIN WITH | {0}:{1}'.format(username,password))
             logged_in = False
 
         return logged_in
@@ -77,9 +90,9 @@ class Main:
                     sleep(stream_time)
                     #print(song_name)
                     #driver.execute_script("document.getElementsByClassName('control-button spoticon-play-16 control-button--circled')[0].click()")
-                    print('PLAYLIST [{0}] SONG [{1}] STREAMED WITH [{2}:{3}] FOR [{4} SECONDS]'.format(playlist_title,counter,username,password,stream_time))
+                    print(Fore.GREEN+'['+Fore.WHITE+'!'+Fore.GREEN+'] PLAYLIST {0} | SONG {1} | STREAMED WITH {2}:{3} | FOR {4} SECONDS'.format(playlist_title,counter,username,password,stream_time))
                     with open('streamed.txt','a',encoding='utf8') as f:
-                        f.write('PLAYLIST [{0}] SONG [{1}] STREAMED WITH [{2}:{3}] FOR [{4} SECONDS]\n'.format(playlist_title,counter,username,password,stream_time))
+                        f.write('PLAYLIST {0} | SONG {1} | STREAMED WITH {2}:{3} | FOR {4} SECONDS\n'.format(playlist_title,counter,username,password,stream_time))
             except:
                 pass
             
