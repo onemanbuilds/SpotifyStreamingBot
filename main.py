@@ -1,6 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from time import sleep
 from random import randint
 from concurrent.futures import ThreadPoolExecutor
@@ -40,6 +44,7 @@ class Main:
         self.minplay = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the minimum amount of time (seconds) to stream: '))
         self.maxplay = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the maximum amount of time (seconds) to stream: '))
         self.number_of_songs = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many songs want to stream on the playlist: '))
+        self.waiting = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many seconds would you like to wait before streams: '))
         self.url = str(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the stream url: '))
         print('')
 
@@ -51,19 +56,24 @@ class Main:
     def Login(self,username,password,driver:webdriver):
         logged_in = False
         driver.get('https://accounts.spotify.com/en/login/')
-        username_elem = driver.find_element_by_id('login-username')
-        username_elem.send_keys(username)
-        password_elem = driver.find_element_by_id('login-password')
-        password_elem.send_keys(password)
-        login_button_elem = driver.find_element_by_id('login-button')
-        login_button_elem.click()
-        sleep(1)
-        if driver.current_url == 'https://accounts.spotify.com/en/status':
-            print(Fore.GREEN+'['+Fore.WHITE+'!'+Fore.GREEN+'] LOGGED IN WITH | {0}:{1}'.format(username,password))
-            logged_in = True
-        else:
-            print(Fore.RED+'['+Fore.WHITE+'-'+Fore.RED+'] FAILED TO LOGIN WITH | {0}:{1}'.format(username,password))
-            logged_in = False
+        try:
+            element_present = EC.presence_of_element_located((By.ID, 'login-username'))
+            WebDriverWait(driver, 5).until(element_present)
+            username_elem = driver.find_element_by_id('login-username')
+            username_elem.send_keys(username)
+            password_elem = driver.find_element_by_id('login-password')
+            password_elem.send_keys(password)
+            login_button_elem = driver.find_element_by_id('login-button')
+            login_button_elem.click()
+            sleep(5)
+            if driver.current_url == 'https://accounts.spotify.com/en/status':
+                print(Fore.GREEN+'['+Fore.WHITE+'!'+Fore.GREEN+'] LOGGED IN WITH | {0}:{1}'.format(username,password))
+                logged_in = True
+            else:
+                print(Fore.RED+'['+Fore.WHITE+'-'+Fore.RED+'] FAILED TO LOGIN WITH | {0}:{1}'.format(username,password))
+                logged_in = False
+        except TimeoutException:
+            print(Fore.RED+'['+Fore.WHITE+'-'+Fore.RED+'] Timed out waiting for page to load')
 
         return logged_in
 
@@ -79,26 +89,22 @@ class Main:
         if self.Login(username,password,driver) == True:
             driver.get(self.url)
             playlist_title = driver.title
-            sleep(5)
+            sleep(self.waiting)
             try:
                 counter = 0
                 for i in range(self.number_of_songs):
                     stream_time = randint(self.minplay,self.maxplay)
                     counter = counter+1
                     driver.execute_script("document.getElementsByClassName('_38168f0d5f20e658506cd3e6204c1f9a-scss')[{0}].click()".format(i))
-                    #song_name = driver.execute_script("document.getElementsByClassName('_99bbcff33ae810da0bfc335662ae2c1d-scss _8a9c5cc886805907de5073b8ebc3acd8-scss')[{0}].getAttribute('aria-label')".format(i))
                     sleep(stream_time)
-                    #print(song_name)
-                    #driver.execute_script("document.getElementsByClassName('control-button spoticon-play-16 control-button--circled')[0].click()")
                     print(Fore.GREEN+'['+Fore.WHITE+'!'+Fore.GREEN+'] PLAYLIST {0} | SONG {1} | STREAMED WITH {2}:{3} | FOR {4} SECONDS'.format(playlist_title,counter,username,password,stream_time))
                     with open('streamed.txt','a',encoding='utf8') as f:
                         f.write('PLAYLIST {0} | SONG {1} | STREAMED WITH {2}:{3} | FOR {4} SECONDS\n'.format(playlist_title,counter,username,password,stream_time))
             except:
                 pass
-            
         driver.close()
         driver.quit()
-
+            
     def Start(self):
         combos = self.ReadFile('combos.txt','r')
         with ThreadPoolExecutor(max_workers=self.browser_amount) as ex:
