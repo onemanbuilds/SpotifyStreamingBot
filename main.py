@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from time import sleep
-from random import randint
+from random import randint,choice
 from concurrent.futures import ThreadPoolExecutor
 from colorama import init,Fore
 import os
@@ -41,9 +41,12 @@ class Main:
         self.url = ""
         self.minplay = 0
         self.maxplay = 0
+        self.use_proxy = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Would you like to use proxies [1]yes [0]no: '))
+        self.headless = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Would you like to use headless mode [1]yes [0]no: '))
         self.minplay = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the minimum amount of time (seconds) to stream: '))
         self.maxplay = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the maximum amount of time (seconds) to stream: '))
         self.number_of_songs = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many songs want to stream on the playlist: '))
+        self.waiting_before_redirect =int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many seconds would you like to wait before going to the desired url: '))
         self.waiting = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many seconds would you like to wait before streams: '))
         self.url = str(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the stream url: '))
         print('')
@@ -52,6 +55,10 @@ class Main:
         with open(filename,method) as f:
             content = [line.strip('\n') for line in f]
             return content
+
+    def GetRandomProxy(self):
+        proxies_file = self.ReadFile('proxies.txt','r')
+        return choice(proxies_file)
 
     def Login(self,username,password,driver:webdriver):
         logged_in = False
@@ -65,7 +72,7 @@ class Main:
             password_elem.send_keys(password)
             login_button_elem = driver.find_element_by_id('login-button')
             login_button_elem.click()
-            sleep(5)
+            sleep(self.waiting_before_redirect)
             if driver.current_url == 'https://accounts.spotify.com/en/status':
                 print(Fore.GREEN+'['+Fore.WHITE+'!'+Fore.GREEN+'] LOGGED IN WITH | {0}:{1}'.format(username,password))
                 logged_in = True
@@ -76,16 +83,25 @@ class Main:
             print(Fore.RED+'['+Fore.WHITE+'-'+Fore.RED+'] Timed out waiting for page to load')
 
         return logged_in
+        
 
     def Stream(self,combos):
         username = combos.split(':')[0].replace("['","")
         password = combos.split(':')[-1].replace("]'","")
         options = Options()
-        options.add_argument('--headless')
+
+        if self.headless == 1:
+            options.add_argument('--headless')
+
         options.add_argument('no-sandbox')
         options.add_argument('--log-level=3')
+
+        if self.use_proxy == 1:
+            options.add_argument('--proxy-server={0}'.format(self.GetRandomProxy()))
+
         options.add_experimental_option('excludeSwitches', ['enable-logging','enable-automation'])
         driver = webdriver.Chrome(options=options)
+
         if self.Login(username,password,driver) == True:
             driver.get(self.url)
             playlist_title = driver.title
@@ -102,6 +118,7 @@ class Main:
                         f.write('PLAYLIST {0} | SONG {1} | STREAMED WITH {2}:{3} | FOR {4} SECONDS\n'.format(playlist_title,counter,username,password,stream_time))
             except:
                 pass
+
         driver.close()
         driver.quit()
             
