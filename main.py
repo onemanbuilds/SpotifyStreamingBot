@@ -86,27 +86,27 @@ class Main:
         
 
     def Stream(self,combos):
-        username = combos.split(':')[0].replace("['","")
-        password = combos.split(':')[-1].replace("]'","")
-        options = Options()
+        try:
+            username = combos.split(':')[0].replace("['","")
+            password = combos.split(':')[-1].replace("]'","")
+            options = Options()
 
-        if self.headless == 1:
-            options.add_argument('--headless')
+            if self.headless == 1:
+                options.add_argument('--headless')
 
-        options.add_argument('no-sandbox')
-        options.add_argument('--log-level=3')
+            options.add_argument('no-sandbox')
+            options.add_argument('--log-level=3')
 
-        if self.use_proxy == 1:
-            options.add_argument('--proxy-server={0}'.format(self.GetRandomProxy()))
+            if self.use_proxy == 1:
+                options.add_argument('--proxy-server={0}'.format(self.GetRandomProxy()))
 
-        options.add_experimental_option('excludeSwitches', ['enable-logging','enable-automation'])
-        driver = webdriver.Chrome(options=options)
+            options.add_experimental_option('excludeSwitches', ['enable-logging','enable-automation'])
+            driver = webdriver.Chrome(options=options)
 
-        if self.Login(username,password,driver) == True:
-            driver.get(self.url)
-            playlist_title = driver.title
-            sleep(self.waiting)
-            try:
+            if self.Login(username,password,driver) == True:
+                driver.get(self.url)
+                playlist_title = driver.title
+                sleep(self.waiting)
                 counter = 0
                 for i in range(self.number_of_songs):
                     stream_time = randint(self.minplay,self.maxplay)
@@ -116,11 +116,10 @@ class Main:
                     print(Fore.GREEN+'['+Fore.WHITE+'!'+Fore.GREEN+'] PLAYLIST {0} | SONG {1} | STREAMED WITH {2}:{3} | FOR {4} SECONDS'.format(playlist_title,counter,username,password,stream_time))
                     with open('streamed.txt','a',encoding='utf8') as f:
                         f.write('PLAYLIST {0} | SONG {1} | STREAMED WITH {2}:{3} | FOR {4} SECONDS\n'.format(playlist_title,counter,username,password,stream_time))
-            except:
-                pass
-
-        driver.close()
-        driver.quit()
+        except:
+            self.Stream(combos)
+        finally:
+            driver.quit()
             
     def Start(self):
         combos = self.ReadFile('combos.txt','r')
