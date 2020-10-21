@@ -46,8 +46,8 @@ class Main:
         self.minplay = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the minimum amount of time (seconds) to stream: '))
         self.maxplay = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the maximum amount of time (seconds) to stream: '))
         self.number_of_songs = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many songs want to stream on the playlist: '))
-        self.waiting_before_redirect =int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many seconds would you like to wait before going to the desired url: '))
-        self.waiting = int(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many seconds would you like to wait before streams: '))
+        self.waiting_before_redirect = float(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many seconds would you like to wait before going to the desired url: '))
+        self.waiting = float(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] How many seconds would you like to wait before streams: '))
         self.url = str(input(Fore.YELLOW+'['+Fore.WHITE+'>'+Fore.YELLOW+'] Enter the stream url: '))
         print('')
 
