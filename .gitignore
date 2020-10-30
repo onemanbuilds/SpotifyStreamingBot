@@ -132,3 +132,5 @@ SpotifyStreamingBot/SpotifyStreamingBot.exe
 streamed.txt
 combos.txt
 output/SpotifyStreamingBot.exe
+SpotifyStreamingBot/proxies.txt
+SpotifyStreamingBot/useragents.txt
