@@ -2,10 +2,13 @@
  Simple tool which plays spotify songs between the given amount of time with multiple accounts.
  
 # Tool
-![](https://i.ibb.co/PGnp4Z3/tool.png)
+![](https://i.ibb.co/wgvrnXY/spotify-streaming-tool-v2.png)
 
 # Example
-![](https://i.ibb.co/4RX0kQz/example.png)
+![](https://i.ibb.co/k1wB3f9/spotify-streaming-tool-v2-example.png)
+
+# Proof
+![](https://i.ibb.co/PNTWLd3/listening.png)
 
 # Legal
  This was merely a speedrun to demonstrate how streaming bots work.<br/>
