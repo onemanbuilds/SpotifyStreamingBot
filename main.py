@@ -265,10 +265,6 @@ class Main:
                         Thread(target=self.SpotifyCreator).start()
                         sleep(self.wait_before_start)
                 
-
-                   
-                
-
 if __name__ == "__main__":
     main = Main()
     main.Start()
