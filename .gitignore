@@ -135,3 +135,4 @@ output/SpotifyStreamingBot.exe
 SpotifyStreamingBot/proxies.txt
 SpotifyStreamingBot/useragents.txt
 main2.py
+output/ChromeKiller.exe

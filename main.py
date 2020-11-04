@@ -126,7 +126,7 @@ class Main:
                     if username != '':
                         self.PrintText(Fore.CYAN,Fore.RED,'CREATED','{0}:{1} | {2} | {3} | {4}/{5}/{6}'.format(credentails['email'],credentails['password'],credentails['username'],credentails['gender'],credentails['birth_year'],credentails['birth_month'],credentails['birth_day']))
                         if self.method != 1:
-                            self.Stream(credentails['email'],credentails['password'])
+                            self.StartStream(credentails['email'],credentails['password'])
                     else:
                         self.SpotifyCreator()
                 else:
@@ -165,7 +165,7 @@ class Main:
             driver.quit()
             self.Login(username,password,driver)
 
-    def Stream(self,username,password):
+    def StreamArtist(self,username,password):
         try:
             options = Options()
 
@@ -197,17 +197,63 @@ class Main:
                 for i in range(self.number_of_songs):
                     index += 1
                     playtime = randint(self.minplay,self.maxplay)
-                    WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH,f'/html/body/div[4]/div/div[2]/div[4]/main/div/div[2]/div/div/div[2]/section/div/div[4]/div[1]/div/div/div/div[2]/div[{index}]/div/div/div[1]')))
-                    driver.find_element_by_xpath(f'/html/body/div[4]/div/div[2]/div[4]/main/div/div[2]/div/div/div[2]/section/div/div[4]/div[1]/div/div/div/div[2]/div[{index}]/div/div/div[1]').click()
-                    sleep(1)
+                    WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH,f'/html/body/div[4]/div/div[2]/div[4]/main/div/div[2]/div/div/div[2]/section/div/div[4]/div[1]/div/div/div/div[2]/div[{index}]/div/div/div[1]'))).click()
                     WebDriverWait(driver,20).until(EC.text_to_be_present_in_element((By.XPATH,'/html/body/div[4]/div/div[2]/div[3]/footer/div[1]/div[2]/div/div[2]/div[1]'),'0:01'))
                     sleep(playtime)
-                    self.PrintText(Fore.CYAN,Fore.RED,'STREAM',f'SONG {index} | STREAMED FOR {playtime}s | WITH {username}:{password}')
+                    self.PrintText(Fore.CYAN,Fore.RED,'ARTIST STREAM',f'SONG {index} | STREAMED FOR {playtime}s | WITH {username}:{password}')
         except:
             driver.quit()
-            self.Stream(username,password)
+            self.StreamArtist(username,password)
         finally:
             driver.quit()
+
+    def StreamPlaylistOrAlbum(self,username,password):
+        try:
+            options = Options()
+
+            options.add_argument(f'--user-agent={self.GetRandomUserAgent()}')
+            options.add_argument('no-sandbox')
+            options.add_argument('--log-level=3')
+            options.add_argument('--lang=en')
+
+            if self.use_proxy == 1:
+                options.add_argument('--proxy-server=http://{0}'.format(self.GetRandomProxyForStream()))
+
+            #Removes navigator.webdriver flag
+            options.add_experimental_option('excludeSwitches', ['enable-logging','enable-automation'])
+            
+            # For older ChromeDriver under version 79.0.3945.16
+            options.add_experimental_option('useAutomationExtension', False)
+
+            options.add_argument("window-size=1280,800")
+
+            #For ChromeDriver version 79.0.3945.16 or over
+            options.add_argument('--disable-blink-features=AutomationControlled')
+            driver = webdriver.Chrome(options=options)
+
+            if self.Login(username,password,driver) == True:
+                driver.get(self.url)
+                element_present = EC.presence_of_element_located((By.XPATH, '/html/body/div[4]/div/div[2]/div[4]/main/div/div[2]/div/div/div[2]/section/div[4]/div/div[2]/div[2]/div[1]/div/div/div[1]'))
+                WebDriverWait(driver, 20).until(element_present)
+                index = 0
+                for i in range(self.number_of_songs):
+                    index += 1
+                    playtime = randint(self.minplay,self.maxplay)
+                    WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH,f'/html/body/div[4]/div/div[2]/div[4]/main/div/div[2]/div/div/div[2]/section/div[4]/div/div[2]/div[2]/div[{index}]/div/div/div[1]'))).click()
+                    WebDriverWait(driver,20).until(EC.text_to_be_present_in_element((By.XPATH,'/html/body/div[4]/div/div[2]/div[3]/footer/div/div[2]/div/div[2]/div[1]'),'0:01'))
+                    sleep(playtime)
+                    self.PrintText(Fore.CYAN,Fore.RED,'PLAYLIST OR ALBUM STREAM',f'SONG {index} | STREAMED FOR {playtime}s | WITH {username}:{password}')
+        except:
+            driver.quit()
+            self.StreamPlaylistOrAlbum(username,password)
+        finally:
+            driver.quit()
+
+    def StartStream(self,username,password):
+        if self.stream_type == 1:
+            self.StreamArtist(username,password)
+        else:
+            self.StreamPlaylistOrAlbum(username,password)
             
 
     def __init__(self):
@@ -236,17 +282,17 @@ class Main:
         """
         print(self.title)
         self.method = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] ['+Fore.RED+'1'+Fore.CYAN+']Stream From Combos.txt ['+Fore.RED+'0'+Fore.CYAN+']Generate Account Then Stream: '))
-       
+        self.stream_type = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] ['+Fore.RED+'1'+Fore.CYAN+']Artist ['+Fore.RED+'2'+Fore.CYAN+']Playlist Or Album: '))
         self.use_proxy = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] ['+Fore.RED+'1'+Fore.CYAN+']Proxy ['+Fore.RED+'0'+Fore.CYAN+']Proxyless: '))
         
         if self.use_proxy == 1 and self.method != 1:
             self.proxy_type = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] ['+Fore.RED+'1'+Fore.CYAN+']Https ['+Fore.RED+'2'+Fore.CYAN+']Socks4 ['+Fore.RED+'3'+Fore.CYAN+']Socks5: '))
 
-        self.minplay = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Minimum time to stream: '))
-        self.maxplay = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Maximum time to stream: '))
+        self.minplay = float(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Minimum time to stream: '))
+        self.maxplay = float(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Maximum time to stream: '))
         self.number_of_songs = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Songs on the playlist: '))
         self.browser_amount = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Threads: '))
-        self.wait_before_start = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Wait Before Start (seconds): '))
+        self.wait_before_start = float(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Wait Before Start (seconds): '))
         self.url = str(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Stream url: '))
         print('')
 
@@ -257,7 +303,7 @@ class Main:
                     for combo in combos:
                         username = combo.split(':')[0]
                         password = combo.split(':')[-1]
-                        ex.submit(self.Stream,username,password)
+                        ex.submit(self.StartStream,username,password)
                         sleep(self.wait_before_start)
             else:
                 while True:
@@ -268,3 +314,4 @@ class Main:
 if __name__ == "__main__":
     main = Main()
     main.Start()
+    
