@@ -1,5 +1,10 @@
 # SpotifyStreamingBot
  Simple tool which plays spotify songs between the given amount of time with multiple accounts.
+
+# Installation
+```
+pip3 install -r requirements.txt
+``` 
  
 # Tool
 ![](https://i.ibb.co/wgvrnXY/spotify-streaming-tool-v2.png)
