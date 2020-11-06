@@ -176,18 +176,16 @@ class Main:
             logged_in = False
 
             driver.get('https://accounts.spotify.com/en/login/')
-            element_present = EC.presence_of_element_located((By.ID, 'login-username'))
-            WebDriverWait(driver, self.website_load_max_wait).until(element_present)
-            username_elem = driver.find_element_by_id('login-username')
-            username_elem.send_keys(username)
-            password_elem = driver.find_element_by_id('login-password')
-            password_elem.send_keys(password)
-            login_button_elem = driver.find_element_by_id('login-button')
-            login_button_elem.click()
+            login_username_present = EC.presence_of_element_located((By.ID, 'login-username'))
+            WebDriverWait(driver, self.website_load_max_wait).until(login_username_present)
+
+            username_elem = driver.find_element_by_id('login-username').send_keys(username)
+            password_elem = driver.find_element_by_id('login-password').send_keys(password)
+            login_button_elem = driver.find_element_by_id('login-button').click()
 
             try:
-                element_present = EC.url_to_be('https://accounts.spotify.com/en/status')
-                WebDriverWait(driver, self.login_check_max_wait).until(element_present)
+                url_to_be_present = EC.url_to_be('https://accounts.spotify.com/en/status')
+                WebDriverWait(driver, self.login_check_max_wait).until(url_to_be_present)
                 self.PrintText(Fore.CYAN,Fore.RED,'LOGIN',f'LOGGED IN WITH | {username}:{password}')
                 logged_in = True
             except TimeoutException:
