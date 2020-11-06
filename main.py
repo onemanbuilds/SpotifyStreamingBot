@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 from threading import Lock
 from random import choice,randint
 from colorama import init,Fore,Style
@@ -27,7 +28,7 @@ class Main:
 
     def SetTitle(self,title_name:str):
         system("title {0}".format(title_name))
-
+        
     def GetRandomUserAgent(self):
         useragents = self.ReadFile('useragents.txt','r')
         return choice(useragents)
@@ -92,7 +93,6 @@ class Main:
 
     def __init__(self):
         init(convert=True)
-        self.accounts = []
         self.lock = Lock()
         self.clear()
         self.SetTitle('One Man Builds Spotify Streaming Tool Selenium')
@@ -117,6 +117,8 @@ class Main:
         self.number_of_songs = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Songs on the playlist: '))
         self.browser_amount = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Threads: '))
         self.max_wait = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Max Wait (seconds): '))
+        self.website_load_max_wait = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Website Load Max Wait (seconds): '))
+        self.login_check_max_wait = int(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Login Check Max Wait (seconds): '))
         self.wait_before_start = float(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Wait Before Start (seconds): '))
         self.url = str(input(Style.BRIGHT+Fore.CYAN+'['+Fore.RED+'>'+Fore.CYAN+'] Stream url: '))
         print('')
@@ -175,7 +177,7 @@ class Main:
 
             driver.get('https://accounts.spotify.com/en/login/')
             element_present = EC.presence_of_element_located((By.ID, 'login-username'))
-            WebDriverWait(driver, self.max_wait).until(element_present)
+            WebDriverWait(driver, self.website_load_max_wait).until(element_present)
             username_elem = driver.find_element_by_id('login-username')
             username_elem.send_keys(username)
             password_elem = driver.find_element_by_id('login-password')
@@ -183,13 +185,12 @@ class Main:
             login_button_elem = driver.find_element_by_id('login-button')
             login_button_elem.click()
 
-            element_present = EC.url_matches('https://accounts.spotify.com/en/status')
-            WebDriverWait(driver, self.max_wait).until(element_present)
-            
-            if driver.current_url == 'https://accounts.spotify.com/en/status':
+            try:
+                element_present = EC.url_to_be('https://accounts.spotify.com/en/status')
+                WebDriverWait(driver, self.login_check_max_wait).until(element_present)
                 self.PrintText(Fore.CYAN,Fore.RED,'LOGIN',f'LOGGED IN WITH | {username}:{password}')
                 logged_in = True
-            else:
+            except TimeoutException:
                 self.PrintText(Fore.RED,Fore.CYAN,'LOGIN',f'FAILED TO LOGIN WITH | {username}:{password}')
                 logged_in = False
         
@@ -203,7 +204,7 @@ class Main:
             options = Options()
 
             options.add_argument(f'--user-agent={self.GetRandomUserAgent()}')
-            options.add_argument('no-sandbox')
+            options.add_argument('--no-sandbox')
             options.add_argument('--log-level=3')
             options.add_argument('--lang=en')
 
@@ -245,7 +246,7 @@ class Main:
             options = Options()
 
             options.add_argument(f'--user-agent={self.GetRandomUserAgent()}')
-            options.add_argument('no-sandbox')
+            options.add_argument('--no-sandbox')
             options.add_argument('--log-level=3')
             options.add_argument('--lang=en')
 
@@ -296,12 +297,14 @@ class Main:
                         username = combo.split(':')[0]
                         password = combo.split(':')[-1]
                         ex.submit(self.StartStream,username,password)
-                        sleep(self.wait_before_start)
+                        if self.wait_before_start > 0:
+                            sleep(self.wait_before_start)
             else:
                 while True:
                     if active_count()<= self.browser_amount:
                         Thread(target=self.SpotifyCreator).start()
-                        sleep(self.wait_before_start)
+                        if self.wait_before_start > 0:
+                            sleep(self.wait_before_start)
                 
 if __name__ == "__main__":
     main = Main()

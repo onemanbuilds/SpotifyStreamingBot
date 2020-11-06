@@ -136,3 +136,6 @@ SpotifyStreamingBot/proxies.txt
 SpotifyStreamingBot/useragents.txt
 main2.py
 output/ChromeKiller.exe
+SpotifyStreamingBot/account_creator_proxies.txt
+SpotifyStreamingBot/ChromeKiller.exe
+SpotifyStreamingBot/streaming_http_proxies.txt
