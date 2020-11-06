@@ -198,8 +198,6 @@ class Main:
         except:
             driver.quit()
             self.Login(username,password,driver)
-        finally:
-            driver.quit()
 
     def StreamArtist(self,username,password):
         try:
